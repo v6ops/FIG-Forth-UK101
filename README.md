@@ -9,3 +9,6 @@ If you can work out the licence, I'll apply that directly to my own port.
 Aim is to have FIG Forth running either in a 6502 emulator, or on real 6502 hardware (Grant Searle UK101).
 
 zip of original code downloaded from http://6502.org/documents/downloads/source/interpreters/forth65.zip
+
+asm2ca65.pl      is PERL code to text edit rockwell AIM assembler syntax to ca65
+out2monitor.pl   is PERL code to reformat raw hex into input commands for the CEGMON monitor

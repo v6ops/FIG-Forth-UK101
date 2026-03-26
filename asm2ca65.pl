@@ -1,13 +1,29 @@
 #!/usr/bin/perl
-# convert original .asm 6502 assembler listing into cl65 format
+# convert original .asm 6502 assembler listing into ca65 format
 # Unfortunately, there was never a real syntax standard for assembly
 # beyond the definition of the mnemonic opcodes, so all assemblers
-# invented their own. cl65 chosen as it was used in other projects.
+# invented their own. ca65 chosen as it was used in other projects.
 # for loading into a "Grant Searle" style 6502.
 # $1 is the input file (minus .ASM)
-# output is to file $1.s which can be assembled by cl65
+# output is to file $1.s which can be assembled by ca65
 use strict;
 use warnings;
+
+# these literals are commented out
+my $mute = {
+  'TIBX' =>1,
+  'OUTCH' =>1,
+  'INCH' =>1,
+  'TCR' =>1,
+  'XBLANK' =>1,
+  'CRLF' =>1,
+  'HEX2' =>1,
+  'LETTER' =>1,
+  'ONEKEY' =>1,
+  'XW' =>1,
+  'NP' =>1
+};
+
 my $fn = $ARGV[$#ARGV].".ASM";
 my $fn2 = $ARGV[$#ARGV].".s";
 open my $fh1, '<', $fn or die "can't open file $fn\n";
@@ -22,7 +38,7 @@ while (my $l=<$fh1>) {
   chomp $l;
   $l=~s/[\cM]+//g;# strip ctrl-M from input
 
-  # Detect labels (in column 0) and translate to cl65
+  # Detect labels (in column 0) and translate to ca65
   # from
   # label    code 
   # to
@@ -33,9 +49,16 @@ while (my $l=<$fh1>) {
     my $a=$1; # remember the pattern match because we are rematching
     my $b=$2;
     my $c=$3;
+    if ($a eq "TRACE") { # inject our monitor code here
+      print $fh2 ".include \"monitor.s\"\n";
+    }
     if ($c=~/^=/) {
+      if ($mute->{$a}) { # check if we should mute this literal
+	$o="; ".$l;
+      } else {
       # this is actually setting a literal, so do nothing
-      $o=$l;
+        $o=$l;
+      }
      } else {
       my $s=length($a)+length($b); # remember how far to indent
       $o=$a.":"."\n";  # label:
