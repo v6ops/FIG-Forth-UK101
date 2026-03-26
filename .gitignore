@@ -1,2 +1,10 @@
 *.mon
 *.hex
+FIG6502.lbl
+FIG6502.lbs
+FIG6502.lst
+FIG6502.map
+FIG6502.o
+FIG6502.out
+err
+out

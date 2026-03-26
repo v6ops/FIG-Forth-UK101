@@ -133,7 +133,7 @@ NEXT      LDY #1
           STA IP
           BCC L54
           INC IP+1
-L54       JMP W-1        Jump to an indirect jump (W) which
+L54       JMP W-1        ; Jump to an indirect jump (W) which
 ;                        vectors to code pointed to by a code
 ;                        field.
 ;
@@ -3819,4 +3819,3 @@ MON       .WORD *+2
           JMP NEXT
 ;
 TOP       .END           ; end of listing
-
