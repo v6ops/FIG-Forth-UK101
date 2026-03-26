@@ -7,3 +7,5 @@ OSI C1E was my first computer (around 45 years ago). I also had Forth on tape (w
 If you can work out the licence, I'll apply that directly to my own port.
 
 Aim is to have FIG Forth running either in a 6502 emulator, or on real 6502 hardware (Grant Searle UK101).
+
+zip of original code downloaded from http://6502.org/documents/downloads/source/interpreters/forth65.zip
