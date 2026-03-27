@@ -11,4 +11,10 @@ Aim is to have FIG Forth running either in a 6502 emulator, or on real 6502 hard
 zip of original code downloaded from http://6502.org/documents/downloads/source/interpreters/forth65.zip
 
 asm2ca65.pl      is PERL code to text edit rockwell AIM assembler syntax to ca65
+                 It can output monitor i/o for:
+                 1. the original FIG Forth code (for diff)
+                 2. OSI C1E UK101 code for loading into hardware
+                 3. 6502 emulator for loading into https://github.com/ShonFrazier/lib6502
 out2monitor.pl   is PERL code to reformat raw hex into input commands for the CEGMON monitor
+
+

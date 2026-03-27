@@ -12,6 +12,7 @@ use warnings;
 # these literals are commented out
 my $mute = {
   'TIBX' =>1,
+  'ORIG' =>1,
   'OUTCH' =>1,
   'INCH' =>1,
   'TCR' =>1,
@@ -37,6 +38,12 @@ my $o; # output
 while (my $l=<$fh1>) {
   chomp $l;
   $l=~s/[\cM]+//g;# strip ctrl-M from input
+
+  # skip tracing ;) change 1==1 to enable, 1==0 to disable
+  if ( ( 1 == 0) && ($l =~ /\s+JSR\s+(TRACE|TCOLON)\s+/i) ) {
+    print $fh2 "NOP\nNOP\n NOP ; ".$l;  # maintain alignment
+    next;
+  }
 
   # Detect labels (in column 0) and translate to ca65
   # from

@@ -1,5 +1,9 @@
 # License
-This is the only original license text I could locate.
+This is the only original license text I could locate.  
+
+*All publications of the Forth Interest Group are public domain. They may be firther reproduced and distributed by the inclusion of this credit notice:*  
+
+*This publication has been made available by the Forth Interest Group, P.O. Box 1105, San Carlos, Ca 94070 *  
 
 If you have better information, let me know. I have no skin in the game so my code is truly free.
 

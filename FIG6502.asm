@@ -46,7 +46,7 @@ UP        =W+2           ; user area pointer.
 XSAVE     =UP+2          ; temporary for X register.
 ;
 ; TIBX      =$0100         ; terminal input buffer of 84 bytes.
-ORIG      =$0200         ; origin of FORTH's Dictionary.
+; ORIG      =$0200         ; origin of FORTH's Dictionary.
 MEM       =$4000         ; top of assigned memory+1 byte.
 UAREA     =MEM-128       ; 128 bytes of user area
 DAREA     =UAREA-BMAG    ; disk buffer space.
@@ -194,7 +194,10 @@ TRACE:
           JSR XBLANK
 ;
 ;
-          LDA #0
+          ; Ray Hunter. I presume the below is a bug and should read LDY #0
+          ; LDA #0
+          LDY #0
+          ; end Ray Hunter
           LDA (IP),Y
           STA XW
           STA NP         ; fetch the next code field pointer
@@ -222,7 +225,7 @@ TRACE:
           JSR HEX2
           JSR XBLANK
 ;
-          JSR ONEKEY     ; wait for operator keystroke
+          ; JSR ONEKEY     ; wait for operator keystroke
           LDX XSAVE      ; just to pinpoint early problems
           LDY #0
           RTS
@@ -258,6 +261,8 @@ PN1:
 PN2:
           INY
           LDA (NP),Y
+          ; Ray Hunter
+          AND #$7F
           JSR LETTER     ; print letters of name field
           LDA (NP),Y
           BPL PN2
