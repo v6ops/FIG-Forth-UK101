@@ -40,9 +40,13 @@ while (my $l=<$fh1>) {
   $l=~s/[\cM]+//g;# strip ctrl-M from input
 
   # skip tracing ;) change 1==1 to enable, 1==0 to disable
-  if ( ( 1 == 0) && ($l =~ /\s+JSR\s+(TRACE|TCOLON)\s+/i) ) {
-    print $fh2 "NOP\nNOP\n NOP ; ".$l;  # maintain alignment
+  if ( ( 1 == 1) && ($l =~ /\s+JSR\s+(TRACE|TCOLON)\s+/i) ) {
+    print $fh2 "NOP\nNOP\n NOP ; ".$l."\n";  # maintain byte alignment
     next;
+  }
+
+  if ($l=~/\s+(BRK)\s+/) {
+    print $fh2 "JMP byes ;".$l."\n";   # jump to byes (in monitor.s)
   }
 
   # Detect labels (in column 0) and translate to ca65
@@ -67,8 +71,11 @@ while (my $l=<$fh1>) {
         $o=$l;
       }
      } else {
-      my $s=length($a)+length($b); # remember how far to indent
-      $o=$a.":"."\n";  # label:
+      #my $s=length($a)+length($b); # remember how far to indent
+      #$o=$a.":"."\n";  # label:
+      my $s=length($b); # remember how far to indent
+      if ($s>2) { $s--; }
+      $o=$a.":";  # label:
       $o.=" " x $s;    # indent $s spaces
       $o.=$c;          # original code
     }

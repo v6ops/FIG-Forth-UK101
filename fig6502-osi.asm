@@ -1,4 +1,3 @@
-.segment "ZERO"
 ;
 ;                        Through the courtesy of
 ;
@@ -45,27 +44,28 @@ W         =IP+3          ; code field pointer.
 UP        =W+2           ; user area pointer.
 XSAVE     =UP+2          ; temporary for X register.
 ;
-; TIBX      =$0100         ; terminal input buffer of 84 bytes.
-; ORIG      =$0200         ; origin of FORTH's Dictionary.
-MEM       =$4000         ; top of assigned memory+1 byte.
+TIBX      =$0100         ; terminal input buffer of 84 bytes.
+ORIG      =$0380         ; origin of FORTH's Dictionary.
+MEM       =$2000         ; top of assigned memory+1 byte.
 UAREA     =MEM-128       ; 128 bytes of user area
 DAREA     =UAREA-BMAG    ; disk buffer space.
 ;
 ;         Monitor calls for terminal support
 ;
-; OUTCH     =$D2C1         ; output one ASCII char. to term.
-; INCH      =$D1DC         ; input one ASCII char. to term.
-; TCR       =$D0F1         ; terminal return and line feed.
+OUTCH     =$BF2D         ; output one ASCII char. to term. OSI ROM Routine (screen)
+;OUTCH    =$FCB1         ; output one ASCII char. to term. OSI ROM Routine (serial port)
+INCH      =$FD00         ; input one ASCII char. to term.  OSI ROM Routine (keyboard)
+;INCH     =$FE80         ; input one ASCII char. to term.  OSI ROM Routine (serial port)
+;TCR      =$D0F1         ; terminal return and line feed. See end of listing.
 ;
 ;    From DAREA downward to the top of the dictionary is free
 ;    space where the user's applications are compiled.
 ;
 ;    Boot up parameters. This area provides jump vectors
-;    to Boot up  code, and parameters describing the system.
+;    to Boot up code, and parameters describing the system.
 ;
 ;
-.segment "CODE"
-.org $0400 ; *+2
+          .org ORIG
 ;
                          ; User cold entry point
 ENTER:    NOP            ; Vector to COLD entry
@@ -92,7 +92,7 @@ REENTR:   NOP            ; User Warm entry point
 ;    address ending $XXFF. This must be checked and altered on
 ;    any alteration , for the indirect jump at W-1 to operate !
 ;
- .res    2, $EA; *+2
+;         .org *+2
 ;
 ;
 ;                                       LIT
@@ -128,9 +128,7 @@ NEXT:     LDY #1
           DEY
           LDA (IP),Y
           STA W
-NOP
-NOP
- NOP ;           JSR TRACE      ; Remove this when all is well
+;         JSR TRACE      ; Remove this when all is well
           CLC            ; Increment IP by two.
           LDA IP
           ADC #2
@@ -138,8 +136,8 @@ NOP
           BCC L54
           INC IP+1
 L54:      JMP W-1        ; Jump to an indirect jump (W) which
-;                        vectors to code pointed to by a code
-;                        field.
+;                        ; vectors to code pointed to by a code
+;                        ; field.
 ;
 ;    CLIT pushes the next inline byte to data stack
 ;
@@ -164,104 +162,98 @@ CLIT:     .WORD *+2
 ;
 ;    Monitor routines needed to trace.
 ;
-; XBLANK    =$D0AF         ; print one blank
-; CRLF      =$D0D2         ; print a carriage return and line feed.
-; HEX2      =$D2CE         ; print accum as two hex numbers
-; LETTER    =$D2C1         ; print accum as one ASCII character
-; ONEKEY    =$D1DC         ; wait for keystroke
-; XW        =$12           ; scratch reg. to next code field add
-; NP        =$14           ; scratch reg. pointing to name field
+;XBLANK    =$D0AF         ; print one blank
+;CRLF      =$D0D2         ; print a carriage return and line feed.
+;HEX2      =$D2CE         ; print accum as two hex numbers
+;LETTER    =$D2C1         ; print accum as one ASCII character
+;ONEKEY    =$D1DC         ; wait for keystroke
+;XW        =$12           ; scratch reg. to next code field add
+;NP        =$14           ; scratch reg. pointing to name field
 ;
 ;
-.include "monitor.s"
-TRACE:    STX XSAVE
-          JSR CRLF
-          LDA IP+1
-          JSR HEX2
-          LDA IP
-          JSR HEX2       ; print IP, the interpreter pointer
-          JSR XBLANK
+;TRACE:    STX XSAVE
+;          JSR CRLF
+;          LDA IP+1
+;          JSR HEX2
+;          LDA IP
+;          JSR HEX2       ; print IP, the interpreter pointer
+;          JSR XBLANK
 ;
 ;
-          ; Ray Hunter. I presume the below is a bug and should read LDY #0
-          ; LDA #0
-          LDY #0
-          ; end Ray Hunter
-          LDA (IP),Y
-          STA XW
-          STA NP         ; fetch the next code field pointer
-          INY
-          LDA (IP),Y
-          STA XW+1
-          STA NP+1
-          JSR PRNAM      ; print dictionary name
+;          LDA #0
+;          LDA (IP),Y
+;          STA XW
+;          STA NP         ; fetch the next code field pointer
+;          INY
+;          LDA (IP),Y
+;          STA XW+1
+;          STA NP+1
+;          JSR PRNAM      ; print dictionary name
 ;
-          LDA XW+1
-          JSR HEX2       ; print code field address
-          LDA XW
-          JSR HEX2
-          JSR XBLANK
+;          LDA XW+1
+;          JSR HEX2       ; print code field address
+;          LDA XW
+;          JSR HEX2
+;          JSR XBLANK
 ;
-          LDA XSAVE      ; print stack location in zero-page
-          JSR HEX2
-          JSR XBLANK
+;          LDA XSAVE      ; print stack location in zero-page
+;          JSR HEX2
+;          JSR XBLANK
 ;
-          LDA #1         ; print return stack bottom in page 1
-          JSR HEX2
-          TSX
-          INX
-          TXA
-          JSR HEX2
-          JSR XBLANK
+;          LDA #1         ; print return stack bottom in page 1
+;          JSR HEX2
+;          TSX
+;          INX
+;          TXA
+;          JSR HEX2
+;          JSR XBLANK
 ;
-          ; JSR ONEKEY     ; wait for operator keystroke
-          LDX XSAVE      ; just to pinpoint early problems
-          LDY #0
-          RTS
+;          JSR ONEKEY     ; wait for operator keystroke
+;          LDX XSAVE      ; just to pinpoint early problems
+;          LDY #0
+;          RTS
 ;
 ;    TCOLON is called from DOCOLON to label each point
 ;    where FORTH 'nests' one level.
 ;
-TCOLON:   STX XSAVE
-          LDA W
-          STA NP         ; locate the name of the called word
-          LDA W+1
-          STA NP+1
-          JSR CRLF
-          LDA #$3A       ; ':
-          JSR LETTER
-          JSR XBLANK
-          JSR PRNAM
-          LDX XSAVE
-          RTS
+;TCOLON:   STX XSAVE
+;          LDA W
+;          STA NP         ; locate the name of the called word
+;          LDA W+1
+;          STA NP+1
+;          JSR CRLF
+;          LDA #$3A       ; ':
+;          JSR LETTER
+;          JSR XBLANK
+;          JSR PRNAM
+;          LDX XSAVE
+;          RTS
 ;
 ;    Print name by it's code field address in NP
 ;
-PRNAM:    JSR DECNP
-          JSR DECNP
-          JSR DECNP
-          LDY #0
-PN1:      JSR DECNP
-          LDA (NP),Y     ; loop till D7 in name set
-          BPL PN1
-PN2:      INY
-          LDA (NP),Y
-          ; Ray Hunter
-          AND #$7F
-          JSR LETTER     ; print letters of name field
-          LDA (NP),Y
-          BPL PN2
-          JSR XBLANK
-          LDY #0
-          RTS
+;PRNAM:    JSR DECNP
+;          JSR DECNP
+;          JSR DECNP
+;          LDY #0
+;PN1:      JSR DECNP
+;          LDA (NP),Y     ; loop till D7 in name set
+;          BPL PN1
+;PN2:      INY
+;          LDA (NP),Y
+;          JSR LETTER     ; print letters of name field
+;          LDA (NP),Y
+;          BPL PN2
+;          JSR XBLANK
+;          LDY #0
+;          RTS
 ;
 ;    Decrement name field pointer
 ;
-DECNP:    LDA NP
-          BNE DECNP1
-          DEC NP+1
-DECNP1:   DEC NP
-          RTS
+;DECNP:    LDA NP
+;          BNE DECNP1
+;          DEC NP+1
+;DECNP1:   DEC NP
+;          RTS
 ;
 ;
 SETUP:    ASL A
@@ -1053,9 +1045,7 @@ DOCOL:    LDA IP+1
           PHA
           LDA IP
           PHA
-NOP
-NOP
- NOP ;           JSR TCOLON     ; mark the start of a traced : def.
+;          JSR TCOLON     ; mark the start of a traced : def.
           CLC
           LDA W
           ADC #2
@@ -1928,7 +1918,7 @@ L1679:    .WORD $FFE0    ; L1663-L1679
 ;
 ;                                       (.")
 ;                                       SCREEN 44 LINE 8
-L1685:    .BYTE $84,"(.",$22,"",$A9
+L1685:    .BYTE $84,"(.",$22,$A9
           .WORD L1657    ; link to -TRAILING
 PDOTQ:    .WORD DOCOL
           .WORD R
@@ -3205,7 +3195,7 @@ XEMIT:    TYA
           LDY #$1A
           ADC (UP),Y
           STA (UP),Y
-          INY            ; bump user varaible OUT
+          INY            ; bump user variable OUT
           LDA #0
           ADC (UP),Y
           STA (UP),Y
@@ -3303,7 +3293,7 @@ RSLW:     .WORD DOCOL
 ;
           .WORD SEMIS
 ;
-;                                       '
+;                                       "
 ;                                       SCREEN 72 LINE 2
 ;
 L3202:    .BYTE $C1,$A7
@@ -3322,7 +3312,7 @@ TICK:     .WORD DOCOL
 ;                                       SCREEN 72 LINE 6
 ;
 L3217:    .BYTE $86,"FORGE",$D4
-          .WORD L3202    ; link to ' TICK
+          .WORD L3202    ; link to " TICK
 FORG:     .WORD DOCOL
           .WORD TICK,NFA,DUP
           .WORD FENCE,AT,ULESS,CLIT
@@ -3825,10 +3815,15 @@ L3728:    .WORD $FFD4    ; L3706-L3728
 NTOP:     .BYTE $83,"MO",$CE
           .WORD L3696    ; link to VLIST
 MON:      .WORD *+2
-          STX XSAVE
-JMP byes ;          BRK       ; break to monitor which is assumed
-          BRK       ; break to monitor which is assumed
-          LDX XSAVE ; to save this as reentry point
-          JMP NEXT
+          JMP $FE00       ; Go to OSI Monitor
 ;
+; Terminal return and line feed.
+TCR:      PHA
+          LDA #$0D
+          JSR OUTCH
+          LDA #$0A
+          JSR OUTCH
+          PLA
+          RTS
+
 TOP:      .END           ; end of listing

@@ -7,9 +7,9 @@
 ; use the original FIG-Forth code
 use_original_figforth = 0
 ; include the io code for the OSI C1E or UK101
-use_UK101_io = 0
+use_UK101_io = 1
 ; otherwise the 6502 emulator code will be used
-use_6502_emulator = 1
+use_6502_emulator = 0
 
 
 .if    use_original_figforth       ; this is the original code from FIG-Forth
@@ -44,7 +44,7 @@ PAGE2START =$0240         ; above CEGMON which ends at $0234
 PAGE2END   =$02FF         ; below BASIC or other code which starts at $0300
 
 ORIG      =$0400         ; start of the code page. use $0400 to avoid used space
-TIBX      =$0100         ; terminal input buffer of 84 bytes.
+TIBX      =$0240         ; terminal input buffer of 84 bytes.
 
 ; Ray Hunter 2026 inspired from code for the Ohio Scientific C1E or UK101
 ; BY G. SEARLE 2013 and the authors of CEGMON 1980
@@ -66,6 +66,7 @@ eofs:
 ; EOF ?
     cmp #$04 ; ctrl-d to exit (choice of char is arbitrary). also clean carry :)
     beq byes
+    rts
 OUTCH:                    ; used by FIG-Forth
     pha
     cmp #13    ; convert CR to print CR/LF. Possibly not reliable for all code.
@@ -81,6 +82,28 @@ byes:
     jmp $FE00
 ; end Ray Hunter inspired from code by Grant Searle and authors of CEGMON
 ;   end UK101 hardware 
+
+
+HEXOUT:
+    and #$0F            ; mask to lower nibble only
+    cmp	#$0A		; set carry for +1 if >9	
+    bcc NoAdjust	; branch if <=9
+    adc #6		; adjust if A to F
+			; (six plus carry = 7!)
+NoAdjust:
+    adc #$30		; add ASCII "0"
+    jmp OUTCH
+
+HEX2:                    ; this could almost certainly be made more compact
+    pha                  ; save accum for later
+    lsr a                ; upper nibble only
+    lsr a
+    lsr a
+    lsr a
+    jsr HEXOUT           ; print the upper nibble
+    pla
+    jmp HEXOUT           ; print the lower nibble
+
 
 .endif  ; use_UK101_io
 

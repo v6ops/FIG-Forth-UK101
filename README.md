@@ -17,4 +17,41 @@ asm2ca65.pl      is PERL code to text edit rockwell AIM assembler syntax to ca65
                  3. 6502 emulator for loading into https://github.com/ShonFrazier/lib6502
 out2monitor.pl   is PERL code to reformat raw hex into input commands for the CEGMON monitor
 
+FIG Forth uses a double indirect in the NEXT routine. What does that mean?
+The contents of the Code Field is copied from the dictionary are copied to memory location W and W+1. The location W-1 contains $6C = JMP (relative).
+The 6502 doesn;'t handle the carry if the lower nibble (W) is 0x$FF.
+
+```
+;
+;    NEXT is the address interpreter that moves from machine
+;    level word to word.
+;
+NEXT:     LDY #1
+          LDA (IP),Y     ; Fetch code field address pointed
+          STA W+1        ; to by IP.
+          DEY
+          LDA (IP),Y
+          STA W
+;         JSR TRACE      ; Remove this when all is well
+          CLC            ; Increment IP by two.
+          LDA IP
+          ADC #2
+          STA IP
+          BCC L54
+          INC IP+1
+L54:      JMP W-1        ; Jump to an indirect jump (W) which
+```
+
+You can check the code field labels using:
+```
+grep '*+2' *.lst|grep FF
+```
+
+The important thing is that the first octet is no #$FF.
+
+To adjust this enter a value after the line .org *+2 reserving space using extra NOP (No Operation) instructions. THis is only relevant for primitive words that embed 6502 machine code directly in the dictionary.
+```
+;         .org *+2
+NOP
+```
 
