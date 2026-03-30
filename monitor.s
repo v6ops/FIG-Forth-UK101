@@ -111,7 +111,7 @@ HEX2:                    ; this could almost certainly be made more compact
 
 ;   start lib6502 emulator
 ORIG      =$0400         ; start of the code page. use $0400 to avoid used space
-TIBX      =$0100         ; terminal input buffer of 84 bytes.
+TIBX      =$0240         ; terminal input buffer of 84 bytes.
 INCH:
     lda $E000
 eofs:
