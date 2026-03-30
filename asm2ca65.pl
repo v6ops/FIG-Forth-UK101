@@ -47,6 +47,7 @@ while (my $l=<$fh1>) {
 
   if ($l=~/\s+(BRK)\s+/) {
     print $fh2 "JMP byes ;".$l."\n";   # jump to byes (in monitor.s)
+    next;
   }
 
   # Detect labels (in column 0) and translate to ca65

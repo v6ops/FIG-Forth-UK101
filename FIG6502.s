@@ -3830,7 +3830,6 @@ NTOP:     .BYTE $83,"MO",$CE
 MON:      .WORD *+2
           STX XSAVE
 JMP byes ;          BRK       ; break to monitor which is assumed
-          BRK       ; break to monitor which is assumed
           LDX XSAVE ; to save this as reentry point
           JMP NEXT
 ;

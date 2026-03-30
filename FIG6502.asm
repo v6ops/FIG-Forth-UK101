@@ -295,6 +295,9 @@ EXEC:     .WORD *+2
 L89:      .BYTE $86,"BRANC",$C8
           .WORD L75      ; link to EXCECUTE
 BRAN:     .WORD *+2
+          ; Ray Hunter. Y reg looks undefined. Assume Bug.
+          LDY #0        ; set offset to IP to 0. Doesn't change C bit.
+          ; end
           CLC
           LDA (IP),Y
           ADC IP
@@ -3827,7 +3830,6 @@ NTOP:     .BYTE $83,"MO",$CE
 MON:      .WORD *+2
           STX XSAVE
 JMP byes ;          BRK       ; break to monitor which is assumed
-          BRK       ; break to monitor which is assumed
           LDX XSAVE ; to save this as reentry point
           JMP NEXT
 ;
