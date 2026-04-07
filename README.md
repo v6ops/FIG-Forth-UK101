@@ -14,8 +14,9 @@ You need to install lib6502 to run in simlator mode and ca65 to re-assemble (if 
 ## install ca65 - part of cc65
     apt install cc65
 
-## run pre-assembled code in the simulator
+## run code in the simulator
     cd ~/FIG-Forth
+    make
     make run
 
 ## run on UK101 hardware with CEGMON

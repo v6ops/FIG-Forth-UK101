@@ -1,4 +1,4 @@
-#How FIG Forth uses the 6502 CPU
+# How FIG Forth uses the 6502 CPU
 
 FIG Forth implementation is tightly coupled to how the 6502 CPU works.
 This is not unusual in such memory and capability contrained systems.
@@ -18,7 +18,7 @@ In the 6502 a byte is one octet (8 bits). A word is 2 octets (16 bits). Words ar
 The 6502 has special Zero Page instructions ($0000-$00FF). These use one byte adddress and are faster. Forth uses these instructions directly eto implement the Forth stack. That means the Forth stack is limited by the hardware and cannot be relocated without a huge rewrite of the assembly.
 
    
-#How the Dictionary Works
+# How the Dictionary Works
 
 In Forth, the dictionary holds the set of Forth words that can be executed. The dictionary consists of primitive words (machine code definitions) and high level utility definitions. Users can extend the dictionary with new words by referenceing other words in the dictionary to create more complex programmes. The dictionary is stored as a linked list.
 
@@ -92,6 +92,7 @@ FIG-Forth uses variable length words. Other implementations of Forth generally u
 
 
 ## Forth variables
+
 ```
 IP      Interpretative Pointer. A Zero Page location pointing to the current word.
 ```
@@ -133,7 +134,7 @@ TRACE:  outputs trace information on the status of the Forth machine.
         <Hardware/return stack location>     <- S register
 ```
 
-#Lessons Learned during porting
+# Lessons Learned during porting
 
 It takes a while to load the hex on my hardware (12 minutes) which means testing takes quite a while.  :D
 
@@ -144,8 +145,8 @@ It takes a while to load the hex on my hardware (12 minutes) which means testing
 3) Interestingly, despite removing the dependency on the JMP indirect ($6C) opcode by changing NEXT, I am definitely seeing paging problems. Is there anywhere else in the code that is page sensitive to your knowledge? I couldn't find anything.
 
 Padding the BRAN with NOP changes behaviour despite not having any $6C anywhere in the hex.
-CODE:
-SELECT ALL
+
+```
 L89       .BYTE $86,'BRANC',$C8
           .WORD L75      ; link to EXCECUTE
 BRAN      .WORD *+2
@@ -156,6 +157,8 @@ BRAN      .WORD *+2
           NOP
           NOP
           ; end 
+```
+
 0 NOP => echoes but crashes on loop
 1 NOP => all OK
 2 NOP or LDY #0 => all OK
@@ -175,8 +178,8 @@ Anyway, I reverted this change to go back to simple padding on an even page.
 I wrote a small extra debug and entering both Ctrl-J and Ctrl-M actually send ASCII $0A (LF) to the INCH code. Other control characters ctrl-A to ctrl-O are sent transparently. So that explains 100% the emulator behaviour if anyone else hits this and finds this post. I couldn't find any switch to change this as it seems to be a hard-coded function of the Linux Terminal app. ctrl-v ctrl-m did send ctrl-m but then there's a LF for enter ....
 
 So I altered INCH to translate #$0A to #$0D. Problem solved :)
-CODE:
-SELECT ALL
+
+```
 YSAVE     =XSAVE+2        ; temporary for Y register.
 
 INCH:
@@ -197,6 +200,7 @@ INCH:
 ; exit for emulator  
 byes:
     jmp $0000
+```
 
 5) Lesson Learned: A reliable way to add padding to avoid page boundaries
 
