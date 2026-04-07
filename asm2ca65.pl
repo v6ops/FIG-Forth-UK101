@@ -32,6 +32,7 @@ open my $fh2, '>', $fn2 or die "can't open file $fn2\n";
 # output preamble for the ca65 assembler
 #
 print $fh2 ".segment \"ZERO\"\n";
+#print $fh2 ".segment \"DATA\"\n";
 my $done =0;
 my $base=0x0400; # Where to load the code. 6502 is not relocatable. Re-assemble first!
 my $o; # output
@@ -61,9 +62,6 @@ while (my $l=<$fh1>) {
     my $a=$1; # remember the pattern match because we are rematching
     my $b=$2;
     my $c=$3;
-    if ($a eq "TRACE") { # inject our monitor code here
-      print $fh2 ".include \"monitor.s\"\n";
-    }
     if ($c=~/^=/) {
       if ($mute->{$a}) { # check if we should mute this literal
 	$o="; ".$l;
@@ -92,10 +90,12 @@ while (my $l=<$fh1>) {
 
   # change the macro command
   #        .ORIGIN *+2
-  #	  to NOP NOP
+  #	  to padding using ca65 command .res
   #	  this is used to make sure no JMP addresses en in $FF
   #	  which was apparently an old hardware bug
-  $o=~s/\s+\.ORIGIN\s+/ .res    2, \$EA; /; 
+  #	  and insert our monitor code before this padding
+  #	  (before the 1st FORTH word in the dictionary 'LIT')
+  $o=~s/\s+\.ORIGIN\s+/.include  \"monitor.s\"\n.res    3, \$EA; /; 
   # set our origin to $0400 hard coded
   # replaces *=*+2
   $o=~s/\s+\*=/.segment "CODE"\n.org \$0400 ; /; 

@@ -92,7 +92,8 @@ REENTR:   NOP            ; User Warm entry point
 ;    address ending $XXFF. This must be checked and altered on
 ;    any alteration , for the indirect jump at W-1 to operate !
 ;
- .res    2, $EA; *+2
+.include  "monitor.s"
+.res    3, $EA; *+2
 ;
 ;
 ;                                       LIT
@@ -173,7 +174,6 @@ CLIT:     .WORD *+2
 ; NP        =$14           ; scratch reg. pointing to name field
 ;
 ;
-.include "monitor.s"
 TRACE:    STX XSAVE
           JSR CRLF
           LDA IP+1
@@ -295,9 +295,6 @@ EXEC:     .WORD *+2
 L89:      .BYTE $86,"BRANC",$C8
           .WORD L75      ; link to EXCECUTE
 BRAN:     .WORD *+2
-          ; Ray Hunter. Y reg looks undefined. Assume Bug.
-          LDY #0        ; set offset to IP to 0. Doesn't change C bit.
-          ; end
           CLC
           LDA (IP),Y
           ADC IP

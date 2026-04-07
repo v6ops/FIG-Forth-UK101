@@ -7,9 +7,9 @@
 ; use the original FIG-Forth code
 use_original_figforth = 0
 ; include the io code for the OSI C1E or UK101
-use_UK101_io = 1
+use_UK101_io = 0
 ; otherwise the 6502 emulator code will be used
-use_6502_emulator = 0
+use_6502_emulator = 1
 
 
 .if    use_original_figforth       ; this is the original code from FIG-Forth
@@ -60,22 +60,29 @@ ONEKEY := INCH            ; used by FIG-Forth
 XW        =$E0            ; scratch reg. to next code field add
 NP        =$E2            ; scratch reg. pointing to name field
 
+YSAVE     =XSAVE+2        ; temporary for Y register.
+
 INCH:                     ; used by FIG-Forth
+    sty YSAVE
     jsr INPUT
+    ldy YSAVE
+
 eofs:
 ; EOF ?
     cmp #$04 ; ctrl-d to exit (choice of char is arbitrary). also clean carry :)
     beq byes
     rts
 OUTCH:                    ; used by FIG-Forth
+    sty YSAVE
     pha
-    cmp #13    ; convert CR to print CR/LF. Possibly not reliable for all code.
+    cmp #$0D    ; convert CR to print CR/LF. Possibly not reliable for all code.
     bne not_cr
     jsr OUTPUT ; output the CR
-    lda #10 ; LF ; and now add an LF
+    lda #$0A ; LF ; and now add an LF
 not_cr:
     jsr OUTPUT
     pla
+    ldy YSAVE
     rts
 ; exit to CEGMON NEWMON (machine code monitor)
 byes:
@@ -111,9 +118,19 @@ HEX2:                    ; this could almost certainly be made more compact
 
 ;   start lib6502 emulator
 ORIG      =$0400         ; start of the code page. use $0400 to avoid used space
-TIBX      =$0240         ; terminal input buffer of 84 bytes.
+TIBX      =$0100         ; terminal input buffer of 84 bytes.
+YSAVE     =XSAVE+2        ; temporary for Y register.
+
 INCH:
+    sty YSAVE
     lda $E000
+    ldy YSAVE
+
+                          ; lib6502 always send LF, even for Ctrl-M
+    cmp #$0A              ; LF
+    bne eofs
+    lda #$0D              ; CR
+    
 eofs:
 ; EOF ?
     cmp #$FF ; also clean carry :)
@@ -121,7 +138,9 @@ eofs:
     rts
 
 OUTCH:
+    sty YSAVE
     sta $E000
+    ldy YSAVE
     rts
 
 ; exit for emulator  
