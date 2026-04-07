@@ -4,31 +4,31 @@ There are two ways to run the code: via a 6502 simulator or via UK101 hardware.
 You need to install lib6502 to run in simlator mode and ca65 to re-assemble (if you change anything) 
 
 ## install simulator
-mkdir lib6502
-cd lib6502
-git checkout https://github.com/ShonFrazier/lib6502
-cd lib6502
-make
-make install
+    mkdir lib6502
+    cd lib6502
+    git checkout https://github.com/ShonFrazier/lib6502
+    cd lib6502
+    make
+    make install
 
 ## install ca65 - part of cc65
-apt install cc65
+    apt install cc65
 
 ## run pre-assembled code in the simulator
-cd ~/FIG-Forth
-make run
+    cd ~/FIG-Forth
+    make run
 
 ## run on UK101 hardware with CEGMON
-cd ~/FIG-Forth
-vi monitor.s
-use_UK101_io = 1
-; otherwise the 6502 emulator code will be used
-use_6502_emulator = 0
+    cd ~/FIG-Forth
+    vi monitor.s
+    use_UK101_io = 1
+    ; otherwise the 6502 emulator code will be used
+    use_6502_emulator = 0
 
-make
-./out2monitor.pl FIG6502
-cat FIG6502.mon
-<paste into CEGMON monitor on your UK101>
+    make
+    ./out2monitor.pl FIG6502
+    cat FIG6502.mon
+    <paste into CEGMON monitor on your UK101>
 
 
 # FIG-Forth-UK101

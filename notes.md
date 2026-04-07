@@ -164,7 +164,11 @@ BRAN      .WORD *+2
 
 I checked the .hex file and the only difference is the code placing and branch recalculation (which look OK). File increases in size by one octet and direct JMP calculations also move 1 octet.
 
-I reverted this change to go back to simple padding on an even page.
+
+*I apparently missed the JMP W-1 in EXECUTE, which explains the above.
+
+Anyway, I reverted this change to go back to simple padding on an even page.
+
 
 4) Lesson learned: The lib6502 emulator isn't transparent on keyboard input, at least running under Linux shell. :(
 
